@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Link to QR Code - by ycliew</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- QRCode.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <!-- jsPDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, sans-serif; }
+
+    body {
+      background: #0f172a;
+      color: #e5e7eb;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: #020617;
+      border-radius: 16px;
+      max-width: 480px;
+      width: 100%;
+      padding: 24px 24px 20px;
+      box-shadow: 0 18px 45px rgba(15,23,42,0.9);
+      border: 1px solid rgba(148,163,184,0.25);
+    }
+
+    .header { margin-bottom: 20px; }
+
+    .title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+
+    h1 { font-size: 1.4rem; font-weight: 600; color: #f9fafb; }
+
+    .byline { font-size: 0.8rem; color: #9ca3af; }
+
+    .input-group { margin-bottom: 14px; }
+
+    label {
+      font-size: 0.85rem;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    input[type="text"], input[type="color"] {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: #020617;
+      border: 1px solid #1e293b;
+      color: #e5e7eb;
+      font-size: 0.9rem;
+      outline: none;
+    }
+
+    input[type="text"]::placeholder {
+      color: #6b7280;
+    }
+
+    .color-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 18px;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .download-row {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border-radius: 10px;
+      border: none;
+      font-weight: 500;
+      cursor: pointer;
+      transition: 0.15s ease;
+    }
+
+    .btn-generate, .btn-clear {
+      flex: 1;
+      padding: 10px 12px;
+    }
+
+    .btn-generate {
+      background: linear-gradient(135deg,#0ea5e9,#22c55e);
+      color: #020617;
+    }
+
+    .btn-clear {
+      background:#111827;
+      color:#e5e7eb;
+      border:1px solid #1e293b;
+    }
+
+    .btn-secondary {
+      padding: 8px 14px;
+      background:#1e293b;
+      color:#e5e7eb;
+      border:1px solid #334155;
+      font-size:0.85rem;
+      flex: 0 0 auto;
+      min-width: 120px;
+      text-align: center;
+    }
+
+    .btn-secondary:hover { background:#334155; }
+
+    .btn-reset-colors {
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      background:#020617;
+      color:#e5e7eb;
+      border:1px solid #334155;
+      border-radius: 999px;
+    }
+
+    .btn-reset-colors:hover { background:#111827; }
+
+    .qr-section {
+      position: relative;
+      border-radius: 14px;
+      background: radial-gradient(circle at top,rgba(56,189,248,0.15),transparent 60%);
+      border: 1px solid rgba(148,163,184,0.25);
+      padding: 16px;
+      text-align: center;
+      margin-top: 4px;
+    }
+
+    .qr-wrapper {
+      background:#f9fafb;
+      border-radius:12px;
+      padding:14px;
+      display:inline-block;
+      min-width:220px;
+      min-height:220px;
+    }
+
+    #qrcode canvas, #qrcode img { border-radius: 8px; }
+
+    .qr-hint {
+      margin-top: 8px;
+      font-size: 0.8rem;
+      color: #94a3b8;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background:#1e293b;
+      color:#e5e7eb;
+      border:1px solid #334155;
+      padding: 6px 10px;
+      font-size: 0.75rem;
+      border-radius: 999px;
+      cursor: pointer;
+    }
+
+    .copy-btn:hover { background:#334155; }
+
+    .footer {
+      margin-top: 18px;
+      text-align: center;
+      font-size: 0.75rem;
+      color: #6b7280;
+    }
+
+    .footer span { color:#facc15; }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+
+    <!-- Header -->
+    <div class="header">
+      <div class="title-row">
+        <h1>Link to QR Code</h1>
+        <div class="byline">by <strong>ycliew</strong></div>
+      </div>
+    </div>
+
+    <!-- URL -->
+    <div class="input-group">
+      <label>Your URL</label>
+      <input type="text" id="url-input" placeholder="https://example.com" />
+    </div>
+
+    <!-- Colors -->
+    <div class="input-group">
+      <label>QR Code Color</label>
+      <input type="color" id="color-input" value="#000000" />
+    </div>
+
+    <div class="input-group">
+      <label>QR Background Color</label>
+      <input type="color" id="bgcolor-input" value="#ffffff" />
+    </div>
+
+    <div class="color-actions">
+      <button class="btn-reset-colors" id="reset-colors-btn">Reset colors</button>
+    </div>
+
+    <!-- Generate / Clear -->
+    <div class="btn-row">
+      <button class="btn-generate" id="generate-btn">Generate QR</button>
+      <button class="btn-clear" id="clear-btn">Clear</button>
+    </div>
+
+    <!-- QR Section -->
+    <div class="qr-section">
+      <button class="copy-btn" id="copy-btn">Copy</button>
+      <div class="qr-wrapper">
+        <div id="qrcode"></div>
+      </div>
+      <div class="qr-hint" id="qr-hint">Enter a link and click Generate.</div>
+    </div>
+
+    <!-- Downloads -->
+    <div class="download-row">
+      <button class="btn-secondary" id="png-btn">Download PNG</button>
+      <button class="btn-secondary" id="jpg-btn">Download JPG</button>
+      <button class="btn-secondary" id="pdf-btn">Download PDF</button>
+    </div>
+
+    <div class="footer">Made with focus and intent by <span>ycliew</span></div>
+  </div>
+
+  <script>
+    const urlInput = document.getElementById("url-input");
+    const colorInput = document.getElementById("color-input");
+    const bgColorInput = document.getElementById("bgcolor-input");
+    const hint = document.getElementById("qr-hint");
+    const qrContainer = document.getElementById("qrcode");
+
+    function normalizeUrl(url) {
+      url = url.trim();
+      if (!url) return "";
+      if (!/^https?:\/\//i.test(url)) return "https://" + url;
+      return url;
+    }
+
+    function getImageData() {
+      const canvas = qrContainer.querySelector("canvas");
+      const img = qrContainer.querySelector("img");
+      if (canvas) return canvas.toDataURL("image/png");
+      if (img) return img.src;
+      return null;
+    }
+
+    function ensureQrExists() {
+      const d = getImageData();
+      if (!d) {
+        hint.textContent = "Generate a QR code first.";
+        hint.style.color = "#f87171";
+        return null;
+      }
+      return d;
+    }
+
+    function generateQR() {
+      const url = normalizeUrl(urlInput.value);
+      if (!url) {
+        hint.textContent = "Enter a valid URL.";
+        hint.style.color = "#f87171";
+        return;
+      }
+
+      const fg = colorInput.value || "#000000";
+      const bg = bgColorInput.value || "#ffffff";
+
+      qrContainer.innerHTML = "";
+
+      new QRCode(qrContainer, {
+        text: url,
+        width: 220,
+        height: 220,
+        colorDark: fg,
+        colorLight: bg,
+        correctLevel: QRCode.CorrectLevel.H
+      });
+
+      hint.textContent = "QR generated.";
+      hint.style.color = "#94a3b8";
+    }
+
+    function clearQR() {
+      urlInput.value = "";
+      qrContainer.innerHTML = "";
+      hint.textContent = "Enter a link and click Generate.";
+      hint.style.color = "#94a3b8";
+    }
+
+    function resetColors() {
+      colorInput.value = "#000000";
+      bgColorInput.value = "#ffffff";
+
+      // If there's already a QR and a URL, update it with default colors
+      if (urlInput.value.trim() && getImageData()) {
+        generateQR();
+      }
+    }
+
+    function downloadPNG() {
+      const data = ensureQrExists();
+      if (!data) return;
+      const a = document.createElement("a");
+      a.href = data;
+      a.download = "qr-ycliew.png";
+      a.click();
+    }
+
+    function downloadJPG() {
+      const data = ensureQrExists();
+      if (!data) return;
+
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      const img = new Image();
+
+      img.onload = () => {
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+        const jpg = canvas.toDataURL("image/jpeg", 0.92);
+        const a = document.createElement("a");
+        a.href = jpg;
+        a.download = "qr-ycliew.jpg";
+        a.click();
+      };
+
+      img.src = data;
+    }
+
+    async function downloadPDF() {
+      const data = ensureQrExists();
+      if (!data) return;
+
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF();
+      const imgProps = pdf.getImageProperties(data);
+      const pdfW = pdf.internal.pageSize.getWidth();
+      const pdfH = (imgProps.height * pdfW) / imgProps.width;
+      const y = (pdf.internal.pageSize.getHeight() - pdfH) / 2;
+
+      pdf.addImage(data, "PNG", 0, y, pdfW, pdfH);
+      pdf.save("qr-ycliew.pdf");
+    }
+
+    async function copyQR() {
+      const data = ensureQrExists();
+      if (!data) return;
+
+      const blob = await fetch(data).then(r => r.blob());
+      await navigator.clipboard.write([ new ClipboardItem({ "image/png": blob }) ]);
+
+      hint.textContent = "QR copied to clipboard.";
+      hint.style.color = "#22c55e";
+    }
+
+    document.getElementById("generate-btn").addEventListener("click", generateQR);
+    document.getElementById("clear-btn").addEventListener("click", clearQR);
+    document.getElementById("reset-colors-btn").addEventListener("click", resetColors);
+
+    document.getElementById("png-btn").addEventListener("click", downloadPNG);
+    document.getElementById("jpg-btn").addEventListener("click", downloadJPG);
+    document.getElementById("pdf-btn").addEventListener("click", downloadPDF);
+    document.getElementById("copy-btn").addEventListener("click", copyQR);
+  </script>
+</body>
+</html>
